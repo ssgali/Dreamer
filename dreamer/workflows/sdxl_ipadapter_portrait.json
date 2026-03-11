@@ -1,0 +1,123 @@
+{
+  "_comment": "Dreamer — SDXL + IPAdapter FaceID v2 Pipeline",
+  "_version": "1.0.0",
+  "_description": "Identity-preserving portrait generation. Drop into ComfyUI. Requires: IPAdapter-plus, ControlNet-Aux nodes.",
+
+  "1": {
+    "inputs": { "ckpt_name": "sd_xl_base_1.0.safetensors" },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": { "title": "Load SDXL Checkpoint" }
+  },
+
+  "2": {
+    "inputs": { "vae_name": "sdxl_vae.safetensors" },
+    "class_type": "VAELoader",
+    "_meta": { "title": "Load VAE" }
+  },
+
+  "3": {
+    "inputs": {
+      "image": "portrait.jpg",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": { "title": "load_image_node" }
+  },
+
+  "4": {
+    "inputs": {
+      "ipadapter_file": "ip-adapter-faceid-plusv2_sdxl.bin"
+    },
+    "class_type": "IPAdapterModelLoader",
+    "_meta": { "title": "Load IPAdapter FaceID Model" }
+  },
+
+  "5": {
+    "inputs": {
+      "clip_name": "CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors"
+    },
+    "class_type": "CLIPVisionLoader",
+    "_meta": { "title": "Load CLIP Vision" }
+  },
+
+  "6": {
+    "inputs": {
+      "model": ["1", 0],
+      "ipadapter": ["4", 0],
+      "image": ["3", 0],
+      "clip_vision": ["5", 0],
+      "weight": 0.78,
+      "weight_type": "linear",
+      "start_at": 0.0,
+      "end_at": 1.0,
+      "faceid_v2": true,
+      "weight_v2": 1.0,
+      "unfold_batch": false
+    },
+    "class_type": "IPAdapterAdvanced",
+    "_meta": { "title": "ipadapter_node" }
+  },
+
+  "7": {
+    "inputs": {
+      "text": "professional portrait photograph, with a gentle, warm smile, soft expression, studio lighting, sharp focus, photorealistic, high quality skin texture, natural colors, bokeh background, 85mm lens, f/2.8",
+      "clip": ["1", 1]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": { "title": "positive_prompt_node" }
+  },
+
+  "8": {
+    "inputs": {
+      "text": "deformed, distorted, disfigured, bad anatomy, blurry, low quality, watermark, signature, extra limbs, missing features, ugly, cartoon, painting, illustration, CGI, 3D render",
+      "clip": ["1", 1]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": { "title": "negative_prompt_node" }
+  },
+
+  "9": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": { "title": "empty_latent_node" }
+  },
+
+  "10": {
+    "inputs": {
+      "seed": 42,
+      "steps": 30,
+      "cfg": 7.0,
+      "sampler_name": "dpmpp_2m",
+      "scheduler": "karras",
+      "denoise": 0.65,
+      "model": ["6", 0],
+      "positive": ["7", 0],
+      "negative": ["8", 0],
+      "latent_image": ["9", 0]
+    },
+    "class_type": "KSampler",
+    "_meta": { "title": "ksampler_node" }
+  },
+
+  "11": {
+    "inputs": {
+      "samples": ["10", 0],
+      "vae": ["2", 0]
+    },
+    "class_type": "VAEDecode",
+    "_meta": { "title": "VAE Decode" }
+  },
+
+  "12": {
+    "inputs": {
+      "filename_prefix": "portrait_variation",
+      "images": ["11", 0]
+    },
+    "class_type": "SaveImage",
+    "_meta": { "title": "Save Output" }
+  }
+}

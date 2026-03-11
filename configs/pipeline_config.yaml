@@ -1,0 +1,40 @@
+# Dreamer — Pipeline Configuration
+
+comfyui:
+  url: "http://127.0.0.1:8188"
+  timeout: 300  # seconds to wait per image
+
+generation:
+  default_workflow: "workflows/sdxl_ipadapter_portrait.json"
+  width: 1024
+  height: 1024
+  steps: 30
+  cfg: 7.0
+  sampler: "dpmpp_2m"
+  scheduler: "karras"
+  denoise: 0.65
+
+ipadapter:
+  weight: 0.78
+  weight_type: "linear"  # options: linear, ease in, ease out, ease in-out
+  start_at: 0.0
+  end_at: 1.0
+
+controlnet:
+  enabled: false         # set true to use pose locking
+  strength: 0.45
+  start_percent: 0.0
+  end_percent: 0.65
+
+codeformer:
+  enabled: false         # set true for post-processing
+  fidelity_weight: 0.7   # 0.0 = max restoration, 1.0 = max fidelity
+
+preprocessing:
+  auto_crop_face: true
+  target_size: 1024
+  jpeg_quality: 95
+
+output:
+  filename_prefix: "portrait_variation"
+  save_metadata: true    # save generation params as JSON sidecar

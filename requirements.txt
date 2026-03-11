@@ -1,0 +1,25 @@
+# Dreamer — Python Dependencies
+
+# Core
+requests>=2.31.0
+Pillow>=10.0.0
+numpy>=1.24.0
+pyyaml>=6.0
+
+# Hugging Face
+huggingface-hub>=0.20.0
+
+# Face processing
+insightface>=0.7.3
+onnxruntime-gpu>=1.16.0  # use onnxruntime for CPU-only
+
+# Optional: notebook support
+jupyter>=1.0.0
+ipywidgets>=8.0.0
+
+# Optional: Gradio UI
+gradio>=4.0.0
+
+# Optional: progress bars / CLI
+tqdm>=4.65.0
+rich>=13.0.0
