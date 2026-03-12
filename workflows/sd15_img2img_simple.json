@@ -1,0 +1,116 @@
+{
+  "_comment": "Dreamer-Lite — Pure img2img fallback. NO custom nodes required.",
+  "_description": "Zero-dependency workflow. Uses only built-in ComfyUI nodes. Lower identity preservation but always works.",
+  "_vram_budget": "~2.1 GB peak",
+  "_comfyui_flags": "--lowvram",
+  "_when_to_use": "If IPAdapter installation fails, or on very constrained hardware (< 4 GB VRAM)",
+
+  "1": {
+    "inputs": {
+      "ckpt_name": "v1-5-pruned-emaonly.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": { "title": "① Load SD 1.5" }
+  },
+
+  "2": {
+    "inputs": {
+      "image": "portrait.jpg",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": { "title": "② Load Input Portrait" }
+  },
+
+  "3": {
+    "inputs": {
+      "pixels": ["2", 0],
+      "vae": ["1", 2]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "③ Encode to Latent Space",
+      "_note": "This encodes the input image into the latent space where diffusion happens."
+    }
+  },
+
+  "4": {
+    "inputs": {
+      "upscale_method": "nearest-exact",
+      "width": 512,
+      "height": 512,
+      "crop": "center",
+      "image": ["2", 0]
+    },
+    "class_type": "ImageScale",
+    "_meta": { "title": "③b Resize Input to 512×512" }
+  },
+
+  "5": {
+    "inputs": {
+      "pixels": ["4", 0],
+      "vae": ["1", 2]
+    },
+    "class_type": "VAEEncode",
+    "_meta": { "title": "④ Encode Resized Image" }
+  },
+
+  "6": {
+    "inputs": {
+      "text": "portrait photograph of a person, with a gentle warm smile, natural expression, studio lighting, sharp focus, photorealistic skin, 85mm lens",
+      "clip": ["1", 1]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "⑤ Positive Prompt  ← EDIT EXPRESSION HERE",
+      "_tip": "Change 'gentle warm smile' to any expression you want"
+    }
+  },
+
+  "7": {
+    "inputs": {
+      "text": "deformed, blurry, bad anatomy, low quality, watermark, extra limbs, cartoon",
+      "clip": ["1", 1]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": { "title": "⑥ Negative Prompt" }
+  },
+
+  "8": {
+    "inputs": {
+      "seed": 42,
+      "steps": 20,
+      "cfg": 7.0,
+      "sampler_name": "euler_ancestral",
+      "scheduler": "normal",
+      "denoise": 0.55,
+      "model": ["1", 0],
+      "positive": ["6", 0],
+      "negative": ["7", 0],
+      "latent_image": ["5", 0]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "⑦ KSampler  [denoise=0.55]",
+      "_note": "denoise controls how much to change: 0.4=subtle, 0.55=balanced, 0.75=dramatic"
+    }
+  },
+
+  "9": {
+    "inputs": {
+      "samples": ["8", 0],
+      "vae": ["1", 2]
+    },
+    "class_type": "VAEDecode",
+    "_meta": { "title": "⑧ Decode Latent → Pixel" }
+  },
+
+  "10": {
+    "inputs": {
+      "filename_prefix": "portrait_img2img",
+      "images": ["9", 0]
+    },
+    "class_type": "SaveImage",
+    "_meta": { "title": "⑨ Save Output" }
+  }
+}

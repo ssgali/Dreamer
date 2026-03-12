@@ -1,69 +1,25 @@
 [
   {
-    "name": "SDXL Base 1.0",
-    "repo_id": "stabilityai/stable-diffusion-xl-base-1.0",
-    "filename": "sd_xl_base_1.0.safetensors",
+    "name": "Stable Diffusion 1.5",
+    "repo_id": "runwayml/stable-diffusion-v1-5",
+    "filename": "v1-5-pruned-emaonly.safetensors",
     "dest_subdir": "checkpoints",
     "required": true
   },
   {
-    "name": "IPAdapter FaceID Plus v2 (SDXL)",
-    "repo_id": "h94/IP-Adapter-FaceID",
-    "filename": "ip-adapter-faceid-plusv2_sdxl.bin",
+    "name": "IPAdapter SD1.5 (standard)",
+    "repo_id": "h94/IP-Adapter",
+    "filename": "models/ip-adapter_sd15.bin",
     "dest_subdir": "ipadapter",
+    "dest_filename": "ip-adapter_sd15.bin",
     "required": true
   },
   {
-    "name": "IPAdapter CLIP Vision ViT-H",
+    "name": "CLIP Vision ViT-H",
     "repo_id": "h94/IP-Adapter",
     "filename": "models/image_encoder/model.safetensors",
-    "dest_subdir": "clip_vision",
     "dest_filename": "CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors",
+    "dest_subdir": "clip_vision",
     "required": true
-  },
-  {
-    "name": "InsightFace buffalo_l",
-    "repo_id": "public-data/insightface",
-    "filename": [
-      "buffalo_l/1k3d68.onnx",
-      "buffalo_l/2d106det.onnx",
-      "buffalo_l/det_10g.onnx",
-      "buffalo_l/genderage.onnx",
-      "buffalo_l/w600k_r50.onnx"
-    ],
-    "dest_subdir": "insightface",
-    "required": true
-  },
-  {
-    "name": "ControlNet OpenPose (SD1.5)",
-    "repo_id": "lllyasviel/ControlNet-v1-1",
-    "filename": "control_v11p_sd15_openpose.pth",
-    "dest_subdir": "controlnet",
-    "required": false,
-    "note": "Optional — only needed for pose-locked generation"
-  },
-  {
-    "name": "ControlNet OpenPose (SDXL)",
-    "repo_id": "thibaud/controlnet-openpose-sdxl-1.0",
-    "filename": "OpenPoseXL2.safetensors",
-    "dest_subdir": "controlnet",
-    "required": false
-  },
-  {
-    "name": "CodeFormer",
-    "repo_id": "sczhou/CodeFormer",
-    "filename": "weights/CodeFormer/codeformer.pth",
-    "dest_subdir": "facerestore_models",
-    "dest_filename": "codeformer.pth",
-    "required": false,
-    "note": "Optional post-processing — highly recommended for quality"
-  },
-  {
-    "name": "SDXL VAE",
-    "repo_id": "madebyollin/sdxl-vae-fp16-fix",
-    "filename": "sdxl_vae.safetensors",
-    "dest_subdir": "vae",
-    "required": false,
-    "note": "Fixes fp16 NaN issues — recommended"
   }
 ]

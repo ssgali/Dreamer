@@ -1,0 +1,27 @@
+# Dreamer-Lite — Expression Presets
+# Edit these freely. The prompt field is injected directly into the generation.
+
+expressions:
+  gentle_smile:
+    prompt: "with a gentle warm smile, soft natural expression"
+
+  confident:
+    prompt: "with a confident expression, slight upward smile, strong direct gaze"
+
+  neutral:
+    prompt: "with a neutral relaxed expression, calm soft eyes"
+
+  thoughtful:
+    prompt: "with a thoughtful contemplative expression, eyes slightly unfocused"
+
+  joyful:
+    prompt: "with a bright joyful smile, eyes slightly squinted with happiness"
+
+# Generation settings — tune for your hardware
+generation:
+  width: 512         # Keep at 512 for 4 GB VRAM. Try 640 if you have headroom.
+  height: 512
+  steps: 25          # 20 = fast, 25 = default, 30 = slightly better quality
+  cfg: 7.5           # 6–8 is the useful range for SD1.5 portraits
+  sampler: "euler_ancestral"   # euler_a = varied, dpm++_2m_karras = consistent
+  ipadapter_weight: 0.65       # 0.5 = loose, 0.65 = balanced, 0.8 = tight identity

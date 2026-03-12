@@ -1,178 +1,131 @@
-# Dreamer
+#  Dreamer-Lite
 
-> **Identity-preserving portrait generation using ComfyUI, SDXL, IPAdapter, and ControlNet**
+> **Identity-aware portrait variation with ComfyUI + SD 1.5 + IPAdapter — runs on 4 GB VRAM**
 
----
-
-## What Is This?
-
-**Dreamer** is a modular, extensible pipeline for generating high-quality portrait variations from a single input image — while **preserving facial identity**. Built on top of [ComfyUI](https://github.com/comfyanonymous/ComfyUI) with SDXL, IPAdapter, and ControlNet, it allows you to:
-
-- Generate **5–20 portrait variations** in a single batch
-- Preserve subject **identity and likeness** across generations
-- Control **expression, lighting, style, and background** independently
-- Export **ComfyUI-native JSON workflows** that are drag-and-drop ready
-- Run **headless batch generation** via Python scripts (no UI needed)
+This is a **trimmed-down companion** to [Dreamer](https://github.com/ssgali/Dreamer/tree/main) — same ideas, much lower hardware bar.
 
 ---
 
-## Example Results
+## 🖥️ Hardware Requirements
 
-| Input | Gentle Smile | Confident | Neutral | Relaxed |
-|-------|-------------|-----------|---------|---------|
-| ![input](assets/demo/input.jpg) | ![v1](assets/demo/v1.jpg) | ![v2](assets/demo/v2.jpg) | ![v3](assets/demo/v3.jpg) | ![v4](assets/demo/v4.jpg) |
+| | Minimum | This Repo Targets |
+|--|---------|-------------------|
+| GPU VRAM | 4 GB | **4 GB**  |
+| RAM | 8 GB | 16 GB recommended |
+| Storage | 8 GB free | 10 GB free |
+| GPU | GTX 1650 / RX 580 | RTX 3060 / any 4 GB card |
+| CPU fallback |  slow but works | — |
 
-> *All outputs generated from a single input photo using the IPAdapter + ControlNet OpenPose pipeline.*
+> **No GPU?** ComfyUI can run on CPU with `--cpu` flag. Expect ~5–10 min per image.
 
 ---
 
-## Architecture Overview
+##  What This Demonstrates
+
+This repo is designed as a **hands-on introduction** to three core concepts in modern diffusion pipelines:
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                   Dreamer                                   │
-│                                                             │
-│  Input Image                                                │
-│      │                                                      │
-│      ├──► InsightFace Embedding ──► IPAdapter Face ID       │
-│      │         (identity lock)                              │
-│      │                                                      │
-│      ├──► OpenPose Extraction ──► ControlNet Conditioning   │
-│      │         (pose lock)                                  │
-│      │                                                      │
-│      └──► CLIP Vision ──► Image Prompt Conditioning         │
-│                                                             │
-│  Text Prompts (expression, style, lighting)                 │
-│      │                                                      │
-│      ▼                                                      │
-│  SDXL UNet ──► Latent Space ──► VAE Decode                  │
-│                                                             │
-│  Post-Processing                                            │
-│      ├──► CodeFormer (face restoration)                     │
-│      └──► GFPGAN (enhancement, optional)                    │
-│                                                             │
-│  Output: 5–20 portrait variations @ 1024×1024               │
-└─────────────────────────────────────────────────────────────┘
+1. Denoising Diffusion  →  How SD 1.5 generates images from noise
+2. Image Conditioning  →  How IPAdapter injects a reference image's "look"
+3. Prompt Steering     →  How text guides the denoising process
+```
+
+The task: **take one portrait photo → generate 5 expression variations** while keeping the person recognizable.
+
+```
+Input Photo
+    │
+    ├──► IPAdapter (image conditioning — "look like this person")
+    │         weight: 0.6–0.75
+    │
+    ├──► Text Prompt (expression steering)
+    │         "gentle smile", "neutral", "confident" ...
+    │
+    ▼
+SD 1.5 UNet  (30 denoising steps @ 512×512)
+    │
+    ▼
+Output Portrait  (5 variations, ~45 seconds each on 4 GB GPU)
 ```
 
 ---
 
-## Key Components
+##  Quick Start (5 Steps)
 
-| Component | Role | Why It Matters |
-|-----------|------|----------------|
-| **SDXL** | Base generation model | High-res, photorealistic outputs |
-| **IPAdapter FaceID** | Identity conditioning | Preserves facial features across generations |
-| **ControlNet OpenPose** | Pose conditioning | Keeps head orientation consistent |
-| **InsightFace** | Face embedding extraction | Feeds identity vector to IPAdapter |
-| **CodeFormer** | Post-processing | Restores and sharpens facial details |
-| **ComfyUI** | Workflow orchestration | Visual, node-based pipeline management |
-
----
-
-## Quick Start
-
-### 1. Prerequisites
+### 1. Install ComfyUI
 
 ```bash
-# Python 3.10+
-python --version
-
-# ComfyUI (install if not present)
 git clone https://github.com/comfyanonymous/ComfyUI
 cd ComfyUI
+
+# IMPORTANT for 4 GB VRAM — install with fp16 PyTorch
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
 pip install -r requirements.txt
 ```
 
 ### 2. Clone This Repo
 
 ```bash
-git clone https://github.com/ssgali/Dreamer
+cd ..
+git clone https://github.com/ssgali/Dreamer/tree/Dreamer-lite
 cd Dreamer
 pip install -r requirements.txt
 ```
 
-### 3. Install ComfyUI Custom Nodes
+### 3. Install the One Required Custom Node
 
 ```bash
-# Run our setup script (installs all required custom nodes automatically)
-python scripts/setup_nodes.py
+python scripts/setup.py
+# Installs ComfyUI-IPAdapter-plus into ComfyUI/custom_nodes/
 ```
 
-This installs:
-- `ComfyUI-IPAdapter-plus`
-- `ComfyUI-ControlNet-Aux`
-- `ComfyUI_InstantID`
-- `ComfyUI-CodeFormer`
-- `ComfyUI-Impact-Pack`
-
-### 4. Download Required Models
+### 4. Download Models (~3.5 GB total)
 
 ```bash
 python scripts/download_models.py
+# Downloads SD 1.5, IPAdapter ViT-H, CLIP Vision encoder
 ```
 
-This fetches:
-- `sd_xl_base_1.0.safetensors` (SDXL)
-- `ip-adapter-faceid-plusv2_sdxl.bin` (IPAdapter)
-- `control_v11p_sd15_openpose.pth` (ControlNet)
-- `codeformer.pth` (face restoration)
-
-### 5. Run Generation
+### 5. Generate Portraits
 
 ```bash
-# Using Python script (headless)
-python scripts/generate_portraits.py \
-  --input examples/portrait.jpg \
-  --output outputs/ \
-  --count 10 \
-  --expressions "gentle smile,confident,neutral,relaxed,thoughtful"
+# Start ComfyUI in low-VRAM mode
+cd ../ComfyUI
+python main.py --listen --lowvram
 
-# Or drag-and-drop a workflow into ComfyUI
-# See: workflows/sdxl_ipadapter_portrait.json
+# In a new terminal, run generation
+cd ../portrait-diffusion-lite
+python scripts/run.py --input examples/portrait.jpg --count 5
 ```
+
+Results saved to `outputs/`.
 
 ---
 
-## Repository Structure
+##  Repository Structure
 
 ```
-Dreamer/
+portrait-diffusion-lite/
 │
-├── workflows/                    # ComfyUI JSON workflows (drag & drop ready)
-│   ├── sdxl_ipadapter_portrait.json       # Main pipeline: IPAdapter + SDXL
-│   ├── instantid_portrait.json            # InstantID variant
-│   ├── controlnet_openpose_batch.json     # Pose-locked batch generation
-│   └── full_pipeline_codeformer.json      # With CodeFormer post-processing
+├── workflows/
+│   ├── sd15_ipadapter_lite.json        ← Main workflow (drag into ComfyUI)
+│   └── sd15_img2img_simple.json        ← Even simpler: no IPAdapter needed
 │
-├── scripts/                      # Python automation scripts
-│   ├── generate_portraits.py              # Main CLI generation script
-│   ├── setup_nodes.py                     # Auto-install ComfyUI custom nodes
-│   ├── download_models.py                 # Download required model weights
-│   ├── batch_runner.py                    # Headless ComfyUI API runner
-│   └── face_crop_preprocess.py            # Input preprocessing utilities
+├── scripts/
+│   ├── run.py                          ← One-command generation CLI
+│   ├── setup.py                        ← Install required ComfyUI node
+│   └── download_models.py              ← Fetch model weights
 │
-├── configs/                      # Generation config files
-│   ├── default_expressions.yaml          # Expression prompt templates
-│   ├── lighting_presets.yaml             # Lighting style presets
-│   └── pipeline_config.yaml              # Main pipeline configuration
+├── configs/
+│   └── expressions.yaml               ← Edit expression prompts here
 │
-├── notebooks/                    # Jupyter exploration notebooks
-│   ├── 01_pipeline_walkthrough.ipynb     # Step-by-step tutorial
-│   ├── 02_ipadapter_strength_sweep.ipynb # Hyperparameter exploration
-│   └── 03_expression_interpolation.ipynb # Latent interpolation experiments
+├── docs/
+│   ├── HOW_IT_WORKS.md                ← Plain-English explanation of the pipeline
+│   ├── VRAM_TIPS.md                   ← Tricks to stay under 4 GB
+│   └── NEXT_STEPS.md                  ← Where to go after this demo
 │
-├── docs/                         # Documentation
-│   ├── SETUP.md                          # Detailed setup guide
-│   ├── WORKFLOWS.md                      # Workflow documentation
-│   ├── MODEL_NOTES.md                    # Model selection notes
-│   └── FUTURE_DIRECTIONS.md             # Research roadmap
-│
-├── assets/
-│   └── demo/                            # Demo images
-│
-├── examples/                     # Example inputs
-│   └── portrait.jpg
+├── examples/
+│   └── portrait.jpg                   ← Drop your own photo here
 │
 ├── requirements.txt
 ├── LICENSE
@@ -181,88 +134,74 @@ Dreamer/
 
 ---
 
-## Workflows
+##  Workflows
 
-### 1. `sdxl_ipadapter_portrait.json` — Recommended
-The primary pipeline. Uses **IPAdapter FaceID v2** for identity conditioning and **SDXL** for generation. Best balance of identity preservation and variation quality.
+### `sd15_ipadapter_lite.json` — Main Demo
+**SD 1.5 + IPAdapter ViT-H at 512×512.**
+This is the recommended starting point. Load it in ComfyUI and you'll see every node explained with labels.
 
-**Parameters to tune:**
-- `ipadapter_weight`: `0.7–0.85` (higher = more identity-locked)
-- `cfg_scale`: `6–8`
-- `denoise`: `0.55–0.75` (lower = more conservative variation)
+- Resolution: `512×512`
+- Steps: `25`
+- IPAdapter weight: `0.65`
+- Peak VRAM: ~3.2 GB
 
-### 2. `instantid_portrait.json` — Strongest Identity
-Uses **InstantID** which provides tighter face binding. Recommended when identity preservation is the top priority over stylistic freedom.
+### `sd15_img2img_simple.json` — Zero-Dependency Fallback
+**Pure img2img — no custom nodes needed at all.**
+If IPAdapter gives you trouble, this workflow uses only built-in ComfyUI nodes. Lower identity preservation but always works.
 
-### 3. `controlnet_openpose_batch.json` — Pose Control
-Adds OpenPose skeleton extraction to lock the head pose. Combine with IPAdapter for both identity and pose control simultaneously.
-
-### 4. `full_pipeline_codeformer.json` — Production Quality
-Full pipeline with CodeFormer post-processing for the cleanest final outputs. ~20% slower but noticeably sharper face details.
+- Resolution: `512×512`
+- Denoise: `0.55`
+- Peak VRAM: ~2.1 GB
 
 ---
 
-## Expression Prompt Guide
+##  Tuning for Your Hardware
 
-Expression changes are driven by **positive prompt injection**. Use our built-in presets or write your own:
+### 4 GB VRAM (target)
+```bash
+python main.py --listen --lowvram
+```
+All settings in `configs/expressions.yaml` are pre-tuned for this.
 
+### 6–8 GB VRAM (more headroom)
+Increase resolution and steps:
 ```yaml
-# configs/default_expressions.yaml
-expressions:
-  gentle_smile: "with a gentle, warm smile, soft expression"
-  confident: "with a confident expression, slight smile, strong gaze"
-  neutral: "with a neutral, relaxed expression, calm eyes"
-  relaxed: "with a relaxed, natural expression, soft eyes"
-  thoughtful: "looking thoughtful, slight contemplative expression"
-  joyful: "with a bright joyful smile, eyes slightly squinted"
+# configs/expressions.yaml
+generation:
+  width: 768
+  height: 768
+  steps: 30
 ```
 
----
-
-## Python API
-
-```python
-from scripts.generate_portraits import PortraitPipeline
-
-pipeline = PortraitPipeline(
-    workflow="workflows/sdxl_ipadapter_portrait.json",
-    comfyui_url="http://127.0.0.1:8188"
-)
-
-results = pipeline.generate(
-    input_image="examples/portrait.jpg",
-    expressions=["gentle smile", "confident", "neutral"],
-    count=9,          # total images
-    seed_range=(0, 9999),
-    output_dir="outputs/"
-)
-
-print(f"Generated {len(results)} portraits → {results}")
+### CPU only (no GPU)
+```bash
+python main.py --listen --cpu
 ```
+Expect 5–15 minutes per image. Use `steps: 15` to keep it reasonable.
 
 ---
 
-## Model Comparison
+##  How It Actually Works
 
-| Method | Identity Score | Variation Quality | Speed | Notes |
-|--------|---------------|-------------------|-------|-------|
-| IPAdapter FaceID v2 | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | Fast | Best overall |
-| InstantID | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | Medium | Best identity |
-| IP-Adapter + ControlNet | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | Medium | Pose-controlled |
-| Vanilla img2img | ⭐⭐ | ⭐⭐⭐⭐⭐ | Fast | No identity lock |
+See [`docs/HOW_IT_WORKS.md`](docs/HOW_IT_WORKS.md) for a plain-English walkthrough.
 
----
+**The short version:**
 
-## Future Directions
+1. **Stable Diffusion 1.5** is a trained neural network that has learned to reverse a noise-adding process. At inference time it starts from random noise and gradually *denoises* it toward an image matching your prompt — over 25 steps.
 
-See [`docs/FUTURE_DIRECTIONS.md`](docs/FUTURE_DIRECTIONS.md) for the full roadmap. Key areas:
+2. **IPAdapter** conditions the denoising process on a *reference image* by projecting it into the same feature space as the text prompt. This makes the output look like a variation of your input rather than a random person matching the text.
 
-- **Video Portrait Generation** — Animate expressions using [LivePortrait](https://github.com/KwaiVGI/LivePortrait) or DiffusedHeads
-- **3D-Consistent Multi-View Generation** — Generate portraits from multiple angles with consistent identity using Zero123++ or SyncDreamer
-- **LoRA Fine-tuning per Subject** — Auto-train a subject-specific LoRA from 5–10 reference images for ultra-tight identity lock
-- **Real-time Web Demo** — Gradio/Streamlit app with ComfyUI backend for browser-based generation
-- **Emotion Slider (Latent Control)** — Smooth interpolation between expression states in latent space
-- **Style Transfer Preservation** — Apply artistic styles while keeping identity (e.g., oil painting portrait)
+3. **Expression prompts** steer *which kind* of variation gets generated — the text and image conditioning act together at each denoising step.
 
 ---
 
+##  What to Expect
+
+| Setting | Time/image | VRAM | Identity preservation |
+|---------|-----------|------|----------------------|
+| Default (512, steps=25, ipadapter=0.65) | ~40–60s | ~3.2 GB | Good |
+| Fast (512, steps=15, ipadapter=0.65) | ~20–30s | ~3.0 GB | Good |
+| Higher quality (768, steps=30) | ~90–120s | ~5.5 GB | Very good |
+| Img2img only (no IPAdapter) | ~25–40s | ~2.1 GB | Moderate |
+
+---

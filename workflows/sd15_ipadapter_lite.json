@@ -1,0 +1,135 @@
+{
+  "_comment": "Dreamer-Lite — SD 1.5 + IPAdapter ViT-H @ 512x512",
+  "_description": "Lightweight identity-preserving portrait pipeline. Runs on 4 GB VRAM with --lowvram flag.",
+  "_vram_budget": "~3.2 GB peak",
+  "_comfyui_flags": "--lowvram",
+
+  "1": {
+    "inputs": {
+      "ckpt_name": "v1-5-pruned-emaonly.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": { "title": "① Load SD 1.5  [~2.0 GB]" }
+  },
+
+  "2": {
+    "inputs": {
+      "image": "portrait.jpg",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": { "title": "② Load Reference Portrait" }
+  },
+
+  "3": {
+    "inputs": {
+      "ipadapter_file": "ip-adapter_sd15.bin"
+    },
+    "class_type": "IPAdapterModelLoader",
+    "_meta": { "title": "③ Load IPAdapter (SD1.5)  [~280 MB]" }
+  },
+
+  "4": {
+    "inputs": {
+      "clip_name": "CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors"
+    },
+    "class_type": "CLIPVisionLoader",
+    "_meta": { "title": "④ Load CLIP Vision Encoder  [~600 MB]" }
+  },
+
+  "5": {
+    "inputs": {
+      "model": ["1", 0],
+      "ipadapter": ["3", 0],
+      "image": ["2", 0],
+      "clip_vision": ["4", 0],
+      "weight": 0.65,
+      "weight_type": "linear",
+      "start_at": 0.0,
+      "end_at": 1.0
+    },
+    "class_type": "IPAdapterAdvanced",
+    "_meta": {
+      "title": "⑤ Apply IPAdapter Conditioning",
+      "_note": "weight 0.6-0.75 = good balance. Higher = more identity-locked, less variation."
+    }
+  },
+
+  "6": {
+    "inputs": {
+      "text": "portrait photograph of a person, with a gentle warm smile, soft natural expression, studio lighting, sharp focus, photorealistic, 85mm lens",
+      "clip": ["1", 1]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "⑥ Positive Prompt  ← EDIT EXPRESSION HERE",
+      "_expressions": [
+        "with a gentle warm smile, soft expression",
+        "with a confident expression, slight smile",
+        "with a neutral relaxed expression",
+        "with a thoughtful contemplative expression",
+        "with a bright joyful smile"
+      ]
+    }
+  },
+
+  "7": {
+    "inputs": {
+      "text": "deformed face, bad anatomy, blurry, low quality, watermark, extra limbs, disfigured, cartoon, painting, 3d render, ugly",
+      "clip": ["1", 1]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": { "title": "⑦ Negative Prompt" }
+  },
+
+  "8": {
+    "inputs": {
+      "width": 512,
+      "height": 512,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "⑧ Latent Canvas  [512×512]",
+      "_note": "Keep at 512x512 for SD1.5 on 4GB. Increase to 640x640 if you have headroom."
+    }
+  },
+
+  "9": {
+    "inputs": {
+      "seed": 42,
+      "steps": 25,
+      "cfg": 7.5,
+      "sampler_name": "euler_ancestral",
+      "scheduler": "normal",
+      "denoise": 1.0,
+      "model": ["5", 0],
+      "positive": ["6", 0],
+      "negative": ["7", 0],
+      "latent_image": ["8", 0]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "⑨ KSampler — Denoising Loop",
+      "_note": "euler_a is fast and varied. Use dpm++ 2m karras for more consistent outputs."
+    }
+  },
+
+  "10": {
+    "inputs": {
+      "samples": ["9", 0],
+      "vae": ["1", 2]
+    },
+    "class_type": "VAEDecode",
+    "_meta": { "title": "⑩ VAE Decode — Latent → Pixel" }
+  },
+
+  "11": {
+    "inputs": {
+      "filename_prefix": "portrait_lite",
+      "images": ["10", 0]
+    },
+    "class_type": "SaveImage",
+    "_meta": { "title": "⑪ Save Output" }
+  }
+}

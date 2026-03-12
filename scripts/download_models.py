@@ -15,7 +15,7 @@ from huggingface_hub import hf_hub_download
 
 
 
-with open(r"scripts\MODELS.json", 'r') as fp:
+with open(r"scripts/MODELS.json", 'r') as fp:
     MODELS = json.load(fp) 
 
 # ─────────────────────────────────────────────
