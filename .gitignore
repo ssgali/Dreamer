@@ -208,13 +208,8 @@ __marimo__/
 
 
 # Python
-__pycache__/
 *.py[cod]
 *.pyo
-.env
-venv/
-.venv/
-*.egg-info/
 
 # Outputs & generated images
 outputs/
@@ -246,3 +241,9 @@ Thumbs.db
 .vscode/
 .idea/
 *.swp
+
+
+# Venv 
+
+/ComfyUI
+/dreamer_venv

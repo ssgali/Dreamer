@@ -92,7 +92,7 @@ def preprocess(
         output_path = input_path.stem + "_processed.jpg"
 
     img = Image.open(input_path).convert("RGB")
-    print(f"📸 Input: {img.size[0]}×{img.size[1]} — {input_path.name}")
+    print(f"   Input: {img.size[0]}×{img.size[1]} — {input_path.name}")
 
     # Try face-aware crop
     bbox = None
@@ -114,14 +114,14 @@ def preprocess(
             min(img.width, cx + half),
             min(img.height, cy + half),
         ))
-        print(f"  ✅ Face-aware crop applied")
+        print(f"     Face-aware crop applied")
     else:
         img = center_crop_square(img)
         print(f"  ℹ️  Center crop applied")
 
     img = img.resize((target_size, target_size), Image.LANCZOS)
     img.save(output_path, quality=95)
-    print(f"  💾 Saved: {output_path} ({target_size}×{target_size})")
+    print(f"     Saved: {output_path} ({target_size}×{target_size})")
 
     return str(output_path)
 

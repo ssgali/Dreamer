@@ -1,10 +1,10 @@
-# 🔀 Workflow Reference
+#    Workflow Reference
 
 All workflows are in `workflows/` as ComfyUI-native JSON files. Drag and drop any of them into ComfyUI to load.
 
 ---
 
-## `sdxl_ipadapter_portrait.json` ✅ Recommended
+## `sdxl_ipadapter_portrait.json`    Recommended
 
 **Use this first.** The core pipeline with the best balance of identity fidelity and variation quality.
 
@@ -21,7 +21,7 @@ All workflows are in `workflows/` as ComfyUI-native JSON files. Drag and drop an
 
 ---
 
-## `full_pipeline_codeformer.json` 🔥 Best Quality
+## `full_pipeline_codeformer.json`    Best Quality
 
 Adds ControlNet OpenPose (pose lock) + CodeFormer face restoration. Slower but sharpest outputs.
 
@@ -36,7 +36,7 @@ Adds ControlNet OpenPose (pose lock) + CodeFormer face restoration. Slower but s
 
 ---
 
-## `instantid_portrait.json` 🎯 Strongest Identity
+## `instantid_portrait.json`    Strongest Identity
 
 Uses InstantID for maximum facial identity binding. Less creative variation, tightest face match.
 
@@ -44,7 +44,7 @@ Uses InstantID for maximum facial identity binding. Less creative variation, tig
 
 ---
 
-## `controlnet_openpose_batch.json` 🧍 Pose-Locked
+## `controlnet_openpose_batch.json`    Pose-Locked
 
 OpenPose skeleton extraction + ControlNet. Keeps head orientation identical across all generations.
 

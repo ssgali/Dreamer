@@ -28,7 +28,7 @@ CUSTOM_NODES = [
     },
     {
         "name": "ComfyUI-CodeFormer",
-        "url": "https://github.com/Gourieff/comfyui-reactor-node.git",
+        "url": "https://github.com/Gourieff/ComfyUI-ReActor.git",
         "description": "Face restoration and enhancement post-processing",
     },
     {
@@ -67,7 +67,7 @@ def install_node(node: dict, custom_nodes_dir: Path) -> bool:
         print(f"  ⏭️  {node['name']} already installed — skipping")
         return True
 
-    print(f"  📦 Installing {node['name']}...")
+    print(f"     Installing {node['name']}...")
     print(f"     {node['description']}")
     result = subprocess.run(
         ["git", "clone", node["url"], str(dest)],
@@ -75,7 +75,7 @@ def install_node(node: dict, custom_nodes_dir: Path) -> bool:
         text=True,
     )
     if result.returncode != 0:
-        print(f"  ❌ Failed: {result.stderr}")
+        print(f"     Failed: {result.stderr}")
         return False
 
     # Install node-specific requirements if present
@@ -86,19 +86,19 @@ def install_node(node: dict, custom_nodes_dir: Path) -> bool:
             capture_output=True,
         )
 
-    print(f"  ✅ Installed {node['name']}")
+    print(f"     Installed {node['name']}")
     return True
 
 
 def main():
-    print("🔧 Dreamer — Node Setup")
+    print("   Dreamer — Node Setup")
     print("=" * 50)
 
     try:
         comfyui_root = find_comfyui_root()
-        print(f"✅ Found ComfyUI at: {comfyui_root}\n")
+        print(f"   Found ComfyUI at: {comfyui_root}\n")
     except FileNotFoundError as e:
-        print(f"❌ {e}")
+        print(f"   {e}")
         sys.exit(1)
 
     custom_nodes_dir = comfyui_root / "custom_nodes"
@@ -110,7 +110,7 @@ def main():
             success += 1
 
     print(f"\n{'='*50}")
-    print(f"✅ Setup complete: {success}/{len(CUSTOM_NODES)} nodes installed")
+    print(f"   Setup complete: {success}/{len(CUSTOM_NODES)} nodes installed")
     print(f"\nNext step: python scripts/download_models.py")
 
 

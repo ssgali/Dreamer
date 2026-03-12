@@ -1,4 +1,4 @@
-# 🔧 Setup Guide
+#    Setup Guide
 
 ## System Requirements
 
@@ -36,7 +36,8 @@ python main.py --listen
 ```bash
 # Place adjacent to ComfyUI for auto-detection
 cd ..  # back to parent directory
-git clone https://github.com/yourusername/Dreamer
+
+git clone https://github.com/ssgali/Dreamer
 cd Dreamer
 pip install -r requirements.txt
 ```
@@ -96,7 +97,7 @@ cd ../Dreamer
 python scripts/generate_portraits.py \
   --input examples/portrait.jpg \
   --output outputs/ \
-  --count 10
+  --count 5
 ```
 
 ---

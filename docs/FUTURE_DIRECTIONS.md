@@ -1,10 +1,10 @@
-# 🔮 Future Directions
+#    Future Directions
 
 This document outlines the research and engineering roadmap for Dreamer. These are organized by complexity and impact.
 
 ---
 
-## 🎯 Near-Term (Next 3 Months)
+##    Near-Term (Next 3 Months)
 
 ### 1. Gradio Web Demo
 Build a browser-accessible UI so users can upload a photo and get variations without touching the command line. Backed by the same ComfyUI API, wrapped in a Gradio interface.
@@ -54,7 +54,7 @@ This dramatically improves consistency compared to zero-shot IPAdapter alone.
 
 ---
 
-## 🚀 Medium-Term (3–9 Months)
+##    Medium-Term (3–9 Months)
 
 ### 5. Video Portrait Animation (LivePortrait Integration)
 
@@ -105,7 +105,7 @@ Instead of full regeneration, use **masked inpainting** to only modify the mouth
 
 ---
 
-## 🧬 Long-Term Research (9+ Months)
+##    Long-Term Research (9+ Months)
 
 ### 9. Emotion Disentanglement in Latent Space
 
@@ -151,7 +151,7 @@ Pipeline:
 
 ---
 
-## 🤝 Contributing to These Directions
+##    Contributing to These Directions
 
 If you're working on any of these areas, contributions are very welcome! Please open an issue to discuss your approach before starting a large PR.
 
@@ -163,7 +163,7 @@ Areas where community help is especially valuable:
 
 ---
 
-## 📚 Related Papers & Resources
+##    Related Papers & Resources
 
 | Topic | Resource |
 |-------|----------|

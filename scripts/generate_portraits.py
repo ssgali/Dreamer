@@ -225,7 +225,7 @@ class PortraitPipeline:
                 "Make sure ComfyUI is running: `python main.py --listen`"
             )
 
-        print(f"✅ Connected to ComfyUI at {comfyui_url}")
+        print(f"   Connected to ComfyUI at {comfyui_url}")
 
     def generate(
         self,
@@ -270,13 +270,13 @@ class PortraitPipeline:
         processed_path = self._preprocess(input_image)
 
         # Upload to ComfyUI
-        print(f"📤 Uploading {processed_path}...")
+        print(f"   Uploading {processed_path}...")
         uploaded_name = self.client.upload_image(processed_path)
 
         builder = WorkflowBuilder(self.workflow_path)
         all_outputs = []
 
-        print(f"🎨 Generating {count} portrait variations...")
+        print(f"   Generating {count} portrait variations...")
         for i in range(count):
             expression = expressions[i % len(expressions)]
             seed = random.randint(*seed_range)
@@ -302,9 +302,9 @@ class PortraitPipeline:
             outputs = self.client.download_outputs(history, output_dir)
             all_outputs.extend(outputs)
 
-            print(f"     ✅ Saved: {outputs}")
+            print(f"        Saved: {outputs}")
 
-        print(f"\n🎉 Done! {len(all_outputs)} images saved to {output_dir}")
+        print(f"\n   Done! {len(all_outputs)} images saved to {output_dir}")
         return all_outputs
 
     def _preprocess(self, image_path: str, target_size: int = 1024) -> str:
